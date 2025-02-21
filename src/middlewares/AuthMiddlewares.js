@@ -20,10 +20,16 @@ export const login =
   async (dispatch) => {
     dispatch(loginStart());
     try {
-      const response = await axios.post(`${AUTH_URL}/sign-in`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${AUTH_URL}/sign-in`,
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
       const userDetails = response.data;
 
       localStorage.setItem("user", JSON.stringify(userDetails));
