@@ -1,6 +1,4 @@
 export const AxiosErrorHandler = (error, action, dispatch) => {
-  console.log(error.response?.data);
-
   if (error.response) {
     let message = "";
     let statusCode = error.response.statusCode;

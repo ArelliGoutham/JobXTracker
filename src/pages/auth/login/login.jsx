@@ -27,14 +27,12 @@ const LoginPage = () => {
     e.preventDefault();
     if (isLogin) {
       await dispatch(login({ email, password }));
-      console.log("Login Form submitted:", { email, password });
     } else {
       if (confirmPassword !== password) {
         setPasswordMismatch(true);
         return;
       }
       dispatch(signup({ name, email, password }));
-      console.log("Signup Form submitted:", { email, password, name });
     }
   };
 
