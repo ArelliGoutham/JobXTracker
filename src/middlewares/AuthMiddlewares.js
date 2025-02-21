@@ -10,6 +10,7 @@ import {
   signupStart,
   signupSuccess,
 } from "../redux/slices/AuthSlice";
+import { AxiosErrorHandler } from "./errorMiddleware";
 
 const AUTH_URL = `${import.meta.env.VITE_API_URL}/auth`;
 const USER_URL = `${import.meta.env.VITE_API_URL}/users`;
