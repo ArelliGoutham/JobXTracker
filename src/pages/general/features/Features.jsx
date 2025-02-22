@@ -4,10 +4,16 @@ import { ArrowRight } from "lucide-react";
 const Features = () => {
   const features = [
     {
+      title: "Comprehensive Dashboard",
+      description:
+        "All in one place dashboard for easily navigating through different features",
+      image: "src/assets/user-dashboard.png",
+    },
+    {
       title: "Track Your Applications",
       description:
         "Easily log and monitor all your job applications in one place. Stay organized with detailed status updates and reminders.",
-      image: "/track-applications.jpg", // Replace with your image path
+      image: "src/assets/track-applications.png", // Replace with your image path
     },
     {
       title: "Company Insights",

@@ -1,29 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Edit2Icon, LinkIcon, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   createApplication,
   getApplication,
+  updateApplication,
 } from "../../../../middlewares/applicationsMIddleware";
-
-// Sample application data (mocked API response)
-const SAMPLE_APPLICATIONS = [
-  {
-    id: "1",
-    company: "ABC Corp",
-    position: "Software Engineer",
-    location: "Seattle",
-    status: "offer",
-    dateApplied: "2022-01-01",
-    skills: ["JavaScript", "React", "Node.js"],
-    salary: "$100,000",
-    source: "LinkedIn",
-    jobPostingLink: "https://example.com/job-posting",
-    notes: "No specific rejection reason provided",
-    description: "Full-stack developer role focusing on React and Node.js",
-  },
-];
+import LoadingSpinner from "../../../../components/common/loading/LoadingSpinner";
 
 const ApplicationForm = () => {
   const [searchParams] = useSearchParams();
@@ -31,18 +15,12 @@ const ApplicationForm = () => {
   const applicationId = searchParams.get("application");
 
   const [isEditMode, setIsEditMode] = useState(false);
-  const [application, setApplication] = useState({
-    company: "",
-    position: "",
-    location: "",
-    status: "",
-    salary: "",
-    jobPostingLink: "",
-    skills: "",
-    notes: "",
-    description: "",
-    applicationSource: "",
-  });
+  const [application, setApplication] = useState({ ...defaultFormValues });
+
+  const fetchedApplication = useSelector(
+    (state) => state.applications.application
+  );
+  const loading = useSelector((state) => state.applications.loading);
 
   const dispatch = useDispatch();
 
@@ -55,9 +33,35 @@ const ApplicationForm = () => {
     }
   }, [action, applicationId]);
 
+  useEffect(() => {
+    if (fetchedApplication) {
+      setApplication({ ...application, ...fetchedApplication });
+    }
+  }, [fetchedApplication]);
+
+  useEffect(() => {
+    return () => {
+      setTimeout(() => {
+        setApplication({ ...defaultFormValues });
+      }, 0);
+    };
+  }, []);
+
   const handleSubmit = () => {
-    dispatch(createApplication(application));
+    if (action === "view") {
+      const updatedApplication = { ...application };
+      delete updatedApplication.createdAt;
+      dispatch(updateApplication(updatedApplication));
+      setIsEditMode(false);
+    } else {
+      dispatch(createApplication(application));
+    }
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <div className="w-10/12 h-full m-auto">
       {/* Main container */}
@@ -101,9 +105,9 @@ const ApplicationForm = () => {
                 <InputField
                   label="Role"
                   id="role"
-                  value={application.position}
+                  value={application.role}
                   setValue={(value) =>
-                    setApplication((prev) => ({ ...prev, position: value }))
+                    setApplication((prev) => ({ ...prev, role: value }))
                   }
                   isEditMode={isEditMode}
                   isRequired={true}
@@ -328,5 +332,19 @@ const TextAreaField = ({
     />
   </div>
 );
+
+const defaultFormValues = {
+  id: "",
+  company: "",
+  role: "",
+  location: "",
+  status: "bookmarked",
+  salary: "",
+  jobPostingLink: "",
+  skills: "",
+  notes: "",
+  description: "",
+  applicationSource: "linkedin",
+};
 
 export default ApplicationForm;

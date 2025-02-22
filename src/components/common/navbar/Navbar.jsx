@@ -47,22 +47,20 @@ const Navbar = () => {
           <Link to="/" className="nav-link">
             Home
           </Link>
-          {user ? (
+
+          <Link to="/about" className="nav-link">
+            About
+          </Link>
+          <Link to="/features" className="nav-link">
+            Features
+          </Link>
+          <Link to="/pricing" className="nav-link">
+            Pricing
+          </Link>
+          {user && (
             <Link to="/dashboard" className="nav-link">
               Dashboard
             </Link>
-          ) : (
-            <>
-              <Link to="/about" className="nav-link">
-                About
-              </Link>
-              <Link to="/features" className="nav-link">
-                Features
-              </Link>
-              <Link to="/pricing" className="nav-link">
-                Pricing
-              </Link>
-            </>
           )}
 
           {/* Auth Section */}

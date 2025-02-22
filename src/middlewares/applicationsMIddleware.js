@@ -9,6 +9,9 @@ import {
   fetchApplicationsSuccess,
   fetchApplicationStart,
   fetchApplicationSuccess,
+  updateApplicationFailure,
+  updateApplicationStart,
+  updateApplicationSuccess,
 } from "../redux/slices/ApplicationsSlice";
 import { AxiosErrorHandler } from "./errorMiddleware";
 
@@ -42,9 +45,23 @@ export const getApplications = () => async (dispatch) => {
 export const getApplication = (applicationId) => async (dispatch) => {
   dispatch(fetchApplicationStart());
   try {
-    const response = await axios.get(`${APPLICATIONS_URL}/${applicationId}`);
+    const response = await axios.get(`${APPLICATIONS_URL}/${applicationId}`, {
+      withCredentials: true,
+    });
     dispatch(fetchApplicationSuccess(response.data));
   } catch (error) {
     AxiosErrorHandler(error, fetchApplicationFailure, dispatch);
+  }
+};
+
+export const updateApplication = (body) => async (dispatch) => {
+  dispatch(updateApplicationStart());
+  try {
+    const response = await axios.put(`${APPLICATIONS_URL}`, body, {
+      withCredentials: true,
+    });
+    dispatch(updateApplicationSuccess(response.data));
+  } catch (error) {
+    AxiosErrorHandler(error, updateApplicationFailure, dispatch);
   }
 };

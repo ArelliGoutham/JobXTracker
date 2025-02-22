@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, DollarSign, ExternalLink } from "lucide-react";
+import { MapPin, DollarSign, ExternalLink, Banknote } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ApplicationCard = ({ job }) => {
@@ -14,8 +14,6 @@ const ApplicationCard = ({ job }) => {
         </div>
         <Link
           to={`./form?action=view&application=${job.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
           className="text-orange-500 hover:text-orange-600"
         >
           <ExternalLink className="w-5 h-5" />
@@ -28,7 +26,7 @@ const ApplicationCard = ({ job }) => {
           <span>{job.location}</span>
         </div>
         <div className="flex items-center">
-          <DollarSign className="w-4 h-4 mr-1" />
+          <Banknote className="w-4 h-4 mr-1" />
           <span>{job.salary}</span>
         </div>
       </div>
@@ -47,14 +45,14 @@ const ApplicationCard = ({ job }) => {
       </div>
 
       <div className="mt-3 pt-3 border-t border-gray-100">
-        <a
-          href={job.jobPostingLink}
+        <Link
+          to={job.jobPostingLink}
           target="_blank"
           rel="noopener noreferrer"
           className="text-xs text-gray-500 hover:text-blue-500 flex items-center"
         >
           Applied via {job.applicationSource}
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -9,10 +9,13 @@ import { useNavigate } from "react-router-dom";
 import ApplicationCard from "../../../components/jobs/applicationCards/ApplicationCard";
 import { useDispatch, useSelector } from "react-redux";
 import { getApplications } from "../../../middlewares/applicationsMIddleware";
+import LoadingSpinner from "../../../components/common/loading/LoadingSpinner";
 
 const Applications = () => {
   const [openApplicationForm, setApplicationForm] = useState(false);
-  const { userApplications } = useSelector((state) => state.applications);
+  const { userApplications, loading } = useSelector(
+    (state) => state.applications
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -24,6 +27,8 @@ const Applications = () => {
     setApplicationForm(true);
     navigate("./form?action=new");
   };
+
+  if (loading) <LoadingSpinner />;
 
   return (
     <div className="container mx-auto p-6">
@@ -46,138 +51,19 @@ const Applications = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
+          {userApplications.length === 0 && (
+            <>
+              <p className="text-neutral-400 text-center text-lg">
+                No applications found. Click the "Add Application" button to
+                create your first job application.
+              </p>
+            </>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
-            {applications.map((app, index) => (
-              <>
-                <ApplicationCard key={index} job={app} />
-              </>
+            {userApplications.map((app, index) => (
+              <ApplicationCard key={index} job={app} />
             ))}
           </div>
-          {/* <table className="w-full divide-y divide-gray-200">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 tracking-wider">
-                  Company
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 tracking-wider">
-                  Position
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 tracking-wider">
-                  Location
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 tracking-wider">
-                  Date Applied
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {applications.map((app) => (
-                <Disclosure key={app.id}>
-                  {({ open }) => (
-                    <>
-                      <tr className="hover:bg-gray-50 transition-colors duration-150">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {app.company}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {app.position}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {app.location}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                              app.status
-                            )}`}
-                          >
-                            {app.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {app.dateApplied}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <button
-                            onClick={() => handleEditApplication(app.id)}
-                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors duration-150"
-                          >
-                            <Edit height={16} />
-                          </button>
-                          <DisclosureButton className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors duration-150">
-                            <span>
-                              {open ? "Hide Details" : "View Details"}
-                            </span>
-                            {open ? (
-                              <ChevronsUpIcon className="ml-1.5 h-4 w-4" />
-                            ) : (
-                              <ChevronsDownIcon className="ml-1.5 h-4 w-4" />
-                            )}
-                          </DisclosureButton>
-                        </td>
-                      </tr>
-                      <DisclosurePanel as="tr" className="bg-gray-50">
-                        <td colSpan={5} className="px-6 py-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-3">
-                              <div className="flex gap-2">
-                                <span className="text-sm font-medium text-gray-500">
-                                  Skills:
-                                </span>
-                                <span className="text-sm text-gray-900">
-                                  {app.skills.join(", ")}
-                                </span>
-                              </div>
-                              <div className="flex gap-2">
-                                <span className="text-sm font-medium text-gray-500">
-                                  Salary:
-                                </span>
-                                <span className="text-sm text-gray-900">
-                                  {app.salary}
-                                </span>
-                              </div>
-                              <div className="flex gap-2">
-                                <span className="text-sm font-medium text-gray-500">
-                                  Source:
-                                </span>
-                                <span className="text-sm text-gray-900">
-                                  {app.source}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="space-y-3">
-                              <div className="flex gap-2">
-                                <span className="text-sm font-medium text-gray-500">
-                                  Next Steps:
-                                </span>
-                                <span className="text-sm text-gray-900">
-                                  {app.nextSteps}
-                                </span>
-                              </div>
-                              <div className="flex gap-2">
-                                <span className="text-sm font-medium text-gray-500">
-                                  Notes:
-                                </span>
-                                <span className="text-sm text-gray-900">
-                                  {app.notes}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                      </DisclosurePanel>
-                    </>
-                  )}
-                </Disclosure>
-              ))}
-            </tbody>
-          </table> */}
         </div>
       </div>
     </div>
@@ -195,38 +81,5 @@ const getStatusColor = (status) => {
   };
   return colors[status] || "text-gray-600 bg-gray-50";
 };
-
-const applications = [
-  {
-    id: 1,
-    company: "Atlassian",
-    role: "Software Engineer",
-    location: "New York, NY",
-    status: "bookmarked",
-    salary: "$100,000 - $130,000",
-    jobPostingLink: "https://www.example.com/job/12345",
-    skills: "React, Node.js, TypeScript, PostgreSQL",
-    applicationSource: "linkedin",
-    description:
-      "We are looking for a skilled full stack developer to work on innovative web applications. The ideal candidate should have experience with React, Node.js, and PostgreSQL.",
-    notes: "Candidate must be willing to work in a remote environment.",
-    createdAt: "2025-02-21",
-  },
-  {
-    id: 2,
-    company: "Atlassian",
-    role: "Software Engineer",
-    location: "New York, NY",
-    status: "bookmarked",
-    salary: "$100,000 - $130,000",
-    jobPostingLink: "https://www.example.com/job/12345",
-    skills: "React, Node.js, TypeScript, PostgreSQL",
-    applicationSource: "linkedin",
-    description:
-      "We are looking for a skilled full stack developer to work on innovative web applications. The ideal candidate should have experience with React, Node.js, and PostgreSQL.",
-    notes: "Candidate must be willing to work in a remote environment.",
-    createdAt: "2025-02-21",
-  },
-];
 
 export default Applications;
