@@ -1,19 +1,15 @@
 import { useEffect, useState } from "react";
-// import {
-//   Disclosure,
-//   DisclosureButton,
-//   DisclosurePanel,
-// } from "@headlessui/react";
-import { ChevronsUpIcon, ChevronsDownIcon, Plus, Edit } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ApplicationCard from "../../../components/jobs/applicationCards/ApplicationCard";
 import { useDispatch, useSelector } from "react-redux";
 import { getApplications } from "../../../middlewares/applicationsMIddleware";
 import LoadingSpinner from "../../../components/common/loading/LoadingSpinner";
+import FloatingBar from "../../../components/common/FloatingInfoBar/FloatingBar";
 
 const Applications = () => {
   const [openApplicationForm, setApplicationForm] = useState(false);
-  const { userApplications, loading } = useSelector(
+  const { userApplications, loading, error } = useSelector(
     (state) => state.applications
   );
   const navigate = useNavigate();
@@ -66,6 +62,14 @@ const Applications = () => {
           </div>
         </div>
       </div>
+      {error && (
+        <FloatingBar
+          duration={0}
+          isVisible={true}
+          message={error.message}
+          type="error"
+        />
+      )}
     </div>
   );
 };

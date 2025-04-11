@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BookmarkCheck,
   Briefcase,
@@ -7,45 +7,17 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { USER_ROLES } from "../../../utils/UserRoles";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
-  const features = [
-    {
-      icon: <BookmarkCheck className="w-10 h-10 text-orange-500" />,
-      title: "Check Applications",
-      description:
-        "Track the status of your job applications and manage them in one place.",
-      link: "/applications",
-    },
-    {
-      icon: <Briefcase className="w-10 h-10 text-orange-500" />,
-      title: "Check Jobs",
-      description:
-        "Browse and search for new job opportunities tailored to your profile.",
-      link: "/jobs",
-    },
-    {
-      icon: <UploadCloud className="w-10 h-10 text-orange-500" />,
-      title: "Post Listings",
-      description: "Post job listings if you're an employer or recruiter.",
-      link: "/post-job",
-    },
-    {
-      icon: <FileText className="w-10 h-10 text-orange-500" />,
-      title: "Resume Analyzer",
-      description:
-        "Get feedback on your resume and improve your chances of landing interviews.",
-      link: "/resume-analyzer",
-    },
-    {
-      icon: <Users className="w-10 h-10 text-orange-500" />,
-      title: "Community",
-      description:
-        "Connect with other job seekers, share experiences, and get advice.",
-      link: "/community",
-    },
-  ];
+  const { user } = useSelector((state) => state.auth);
 
+  useEffect(() => {
+    if (user.role === USER_ROLES.USER) {
+      features.push(...RecruiterFeatures);
+    }
+  }, [user]);
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
       {/* Hero Section */}
@@ -104,5 +76,47 @@ const Dashboard = () => {
     </div>
   );
 };
+
+const features = [
+  {
+    icon: <BookmarkCheck className="w-10 h-10 text-orange-500" />,
+    title: "Check Applications",
+    description:
+      "Track the status of your job applications and manage them in one place.",
+    link: "/applications",
+  },
+  {
+    icon: <Briefcase className="w-10 h-10 text-orange-500" />,
+    title: "Check Jobs",
+    description:
+      "Browse and search for new job opportunities tailored to your profile.",
+    link: "/job-listings",
+  },
+
+  {
+    icon: <FileText className="w-10 h-10 text-orange-500" />,
+    title: "Resume Analyzer",
+    description:
+      "Get feedback on your resume and improve your chances of landing interviews.",
+    link: "/resume-analyzer",
+  },
+  {
+    icon: <Users className="w-10 h-10 text-orange-500" />,
+    title: "Community",
+    description:
+      "Connect with other job seekers, share experiences, and get advice.",
+    link: "/community",
+  },
+];
+
+const RecruiterFeatures = [
+  {
+    icon: <UploadCloud className="w-10 h-10 text-orange-500" />,
+    title: "Recruiter Portal",
+    description:
+      "Control your job posting if you are an employer or recruiter.",
+    link: "/recruiter-portal",
+  },
+];
 
 export default Dashboard;

@@ -13,6 +13,9 @@ import Applications from "../pages/jobs/applications/Applications";
 import JobsLayout from "../layouts/jobs/JobsLayout";
 import ApplicationForm from "../pages/jobs/applications/ApplicationForm";
 import PrivateRoute from "../components/PrivateRoute";
+import JobListingsPage from "../pages/jobs/jobsListing/JobsListing";
+import RecruiterPortal from "../pages/jobs/recruiterPortal/RecruiterPortal";
+import RecruiterJobsForm from "../pages/jobs/recruiterPortal/RecruiterJobsForm/JobsForm";
 
 const AppRoutes = () => {
   return (
@@ -45,6 +48,18 @@ const AppRoutes = () => {
           <Route
             path="/applications/form"
             element={<PrivateRoute element={<ApplicationForm />} />}
+          />
+          <Route
+            path="/job-listings"
+            element={<PrivateRoute element={<JobListingsPage />} />}
+          />
+          <Route
+            path="/recruiter-portal"
+            element={<PrivateRoute element={<RecruiterPortal />} />}
+          />
+          <Route
+            path="/recruiter-portal/form"
+            element={<PrivateRoute element={<RecruiterJobsForm />} />}
           />
         </Route>
       </Routes>

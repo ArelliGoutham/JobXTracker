@@ -7,7 +7,7 @@ const initialState = {
   loading: false,
 };
 
-const AuthSlice = createSlice({
+const ApplicationSlice = createSlice({
   name: "applications",
   initialState,
   reducers: {
@@ -53,10 +53,7 @@ const AuthSlice = createSlice({
     },
     updateApplicationSuccess: (state, action) => {
       state.loading = false;
-      const updatedApplications = state.userApplications.map((app) =>
-        app.id === action.payload.id ? action.payload : app
-      );
-      state.userApplications = updatedApplications;
+      state.application = action.payload;
     },
     updateApplicationFailure: (state, action) => {
       state.loading = false;
@@ -78,6 +75,6 @@ export const {
   updateApplicationStart,
   updateApplicationSuccess,
   updateApplicationFailure,
-} = AuthSlice.actions;
+} = ApplicationSlice.actions;
 
-export default AuthSlice.reducer;
+export default ApplicationSlice.reducer;
