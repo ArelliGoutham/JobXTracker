@@ -20,19 +20,13 @@ export const login =
   async (dispatch) => {
     dispatch(loginStart());
     try {
-      const response = await axios.post(
-        `${AUTH_URL}/sign-in`,
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.post(`${AUTH_URL}/login`, {
+        username: email,
+        password,
+      });
       const userDetails = response.data;
 
-      localStorage.setItem("user", JSON.stringify(userDetails));
+      localStorage.setItem("auth", JSON.stringify(userDetails.data));
 
       dispatch(loginSuccess(userDetails));
     } catch (error) {
@@ -43,14 +37,14 @@ export const login =
 export const signout = () => async (dispatch) => {
   dispatch(logoutStart());
   try {
-    await axios.post(
-      `${AUTH_URL}/sign-out`,
-      {},
-      {
-        withCredentials: true,
-      }
-    );
-    localStorage.removeItem("user");
+    // await axios.post(
+    //   `${AUTH_URL}/sign-out`,
+    //   {},
+    //   {
+    //     withCredentials: true,
+    //   }
+    // );
+    localStorage.removeItem("auth");
     dispatch(logoutSuccess());
   } catch (error) {
     AxiosErrorHandler(error, logoutFailure, dispatch);

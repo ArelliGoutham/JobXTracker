@@ -27,13 +27,13 @@ const ApplicationCard = ({ job }) => {
         </div>
         <div className="flex items-center">
           <Banknote className="w-4 h-4 mr-1" />
-          <span>{job.salary}</span>
+          <span>{job.salaryRange}</span>
         </div>
       </div>
 
       <div className="mt-3">
         <div className="flex flex-wrap gap-1">
-          {job.skills.split(", ").map((skill) => (
+          {job.requiredSkills.split(", ").map((skill) => (
             <span
               key={skill}
               className="px-2 py-0.5 bg-orange-50 text-orange-700 rounded text-xs"
@@ -46,12 +46,12 @@ const ApplicationCard = ({ job }) => {
 
       <div className="mt-3 pt-3 border-t border-gray-100">
         <Link
-          to={job.jobPostingLink}
+          to={job.postingUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="text-xs text-gray-500 hover:text-blue-500 flex items-center"
         >
-          Applied via {job.applicationSource}
+          Applied via {job.appliedPlatform.name}
         </Link>
       </div>
     </div>

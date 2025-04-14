@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getApplications } from "../../../middlewares/applicationsMIddleware";
 import LoadingSpinner from "../../../components/common/loading/LoadingSpinner";
 import FloatingBar from "../../../components/common/FloatingInfoBar/FloatingBar";
+import PaginationComponent from "../../../components/common/pagination/PaginationComponent";
 
 const Applications = () => {
   const [openApplicationForm, setApplicationForm] = useState(false);
@@ -16,15 +17,26 @@ const Applications = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getApplications());
+    handleFetchApplications();
   }, [dispatch]);
+
+  const handleFetchApplications = (page = 0, size = 10) => {
+    dispatch(getApplications(page, size));
+  };
 
   const handleNewApplication = () => {
     setApplicationForm(true);
     navigate("./form?action=new");
   };
 
-  if (loading) <LoadingSpinner />;
+  const handlePaginationChange = ({ page, size }) => {
+    console.log("Page:", page, "Size:", size);
+    handleFetchApplications(page, size);
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -47,7 +59,7 @@ const Applications = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          {userApplications.length === 0 && (
+          {userApplications.items.length === 0 && (
             <>
               <p className="text-neutral-400 text-center text-lg">
                 No applications found. Click the "Add Application" button to
@@ -56,11 +68,20 @@ const Applications = () => {
             </>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
-            {userApplications.map((app, index) => (
+            {userApplications.items.map((app, index) => (
               <ApplicationCard key={index} job={app} />
             ))}
           </div>
         </div>
+        <PaginationComponent
+          paginationData={{
+            currentPage: userApplications.currentPage,
+            pageSize: userApplications.pageSize,
+            totalPages: userApplications.totalPages,
+            totalItems: userApplications.totalItems,
+          }}
+          onPaginationChange={handlePaginationChange}
+        />
       </div>
       {error && (
         <FloatingBar

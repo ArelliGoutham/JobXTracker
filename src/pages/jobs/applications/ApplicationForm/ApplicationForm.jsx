@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Edit2Icon, LinkIcon, X } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createApplication,
@@ -8,11 +8,18 @@ import {
   updateApplication,
 } from "../../../../middlewares/applicationsMIddleware";
 import LoadingSpinner from "../../../../components/common/loading/LoadingSpinner";
+import {
+  getApplicationsStatusList,
+  getAppliedPlatforms,
+} from "../../../../middlewares/applicationUtilsMiddleware";
 
 const ApplicationForm = () => {
   const [searchParams] = useSearchParams();
   const action = searchParams.get("action");
   const applicationId = searchParams.get("application");
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [application, setApplication] = useState({ ...defaultFormValues });
@@ -20,13 +27,14 @@ const ApplicationForm = () => {
   const fetchedApplication = useSelector(
     (state) => state.applications.application
   );
-  const loading = useSelector((state) => state.applications.loading);
+  const { error, loading } = useSelector((state) => state.applications);
 
-  const dispatch = useDispatch();
+  const { appliedPlatformsList, applicationStatusList } = useSelector(
+    (state) => state.applicationsUtils
+  );
 
   useEffect(() => {
     if (action === "view" && applicationId) {
-      // Simulating API fetch with static data
       dispatch(getApplication(applicationId));
     } else {
       setIsEditMode(true);
@@ -40,6 +48,15 @@ const ApplicationForm = () => {
   }, [fetchedApplication]);
 
   useEffect(() => {
+    if (appliedPlatformsList.length === 0) {
+      dispatch(getAppliedPlatforms());
+    }
+    if (applicationStatusList.length === 0) {
+      dispatch(getApplicationsStatusList());
+    }
+  }, []);
+
+  useEffect(() => {
     return () => {
       setTimeout(() => {
         setApplication({ ...defaultFormValues });
@@ -47,15 +64,47 @@ const ApplicationForm = () => {
     };
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const updatedApplication = { ...application };
+
     if (action === "view") {
-      const updatedApplication = { ...application };
       delete updatedApplication.createdAt;
-      dispatch(updateApplication(updatedApplication));
+      await dispatch(updateApplication(updatedApplication));
       setIsEditMode(false);
     } else {
-      dispatch(createApplication(application));
+      try {
+        await dispatch(createApplication(updatedApplication));
+        navigate("/applications");
+      } catch (err) {
+        console.error("Error creating application:", err);
+      }
     }
+  };
+
+  // const handleSubmit = async () => {
+  //   if (!validateApplication(application)) {
+  //     alert("Please fill in all required fields.");
+  //     return;
+  //   }
+  //   if (action === "view") {
+  //     const updatedApplication = { ...application };
+  //     delete updatedApplication.createdAt;
+  //     await dispatch(updateApplication(updatedApplication));
+  //     setIsEditMode(false);
+  //   } else {
+  //     try {
+  //       await dispatch(createApplication(application));
+  //       navigate("/applications");
+  //     } catch (err) {}
+  //   }
+  // };
+
+  const validateApplication = (app) => {
+    if (!app.company || !app.role || !app.location) return false;
+    if (!app.appliedPlatform || !app.appliedPlatform.id) return false;
+    if (!app.status || !app.status.id) return false;
+    return true;
   };
 
   if (loading) {
@@ -65,7 +114,7 @@ const ApplicationForm = () => {
   return (
     <div className="w-10/12 h-full m-auto">
       {/* Main container */}
-      <div className="md:h-[600px] max-h-[85vh] overflow-hidden flex flex-col">
+      <div className="md:h-[600px] max-h-[85vh] flex flex-col">
         {/* Form header */}
         <div className="p-4 border-b bg-white flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900">
@@ -82,8 +131,8 @@ const ApplicationForm = () => {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto p-4">
-          <form className="h-full">
+        <form className="flex-1 flex flex-col" onSubmit={handleSubmit}>
+          <div className="flex-1 overflow-y-auto p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Basic Info */}
               <div className="space-y-4">
@@ -127,10 +176,17 @@ const ApplicationForm = () => {
                 <SelectField
                   label="Applied Platform"
                   id="appliedPlatform"
-                  value={application.applicationSource}
-                  options={["linkedin", "indeed", "others"]}
+                  value={application.appliedPlatform?.name || ""}
+                  options={appliedPlatformsList.map(
+                    (platform) => platform.name
+                  )}
                   setValue={(value) =>
-                    setApplication((prev) => ({ ...prev, status: value }))
+                    setApplication((prev) => ({
+                      ...prev,
+                      appliedPlatform: appliedPlatformsList.find(
+                        (platform) => platform.name === value
+                      ),
+                    }))
                   }
                   isEditMode={isEditMode}
                   isRequired={true}
@@ -144,18 +200,16 @@ const ApplicationForm = () => {
                 <SelectField
                   label="Status"
                   id="status"
-                  value={application.status}
-                  options={[
-                    "bookmarked",
-                    "applied",
-                    "scheduled",
-                    "accepted",
-                    "rejected",
-                    "withdrawn",
-                  ]}
-                  setValue={(value) =>
-                    setApplication((prev) => ({ ...prev, status: value }))
-                  }
+                  value={application.status?.name || ""}
+                  options={applicationStatusList.map((status) => status.name)}
+                  setValue={(value) => {
+                    setApplication((prev) => ({
+                      ...prev,
+                      status: applicationStatusList.find(
+                        (status) => status.name === value
+                      ),
+                    }));
+                  }}
                   isEditMode={isEditMode}
                   isRequired={true}
                 />
@@ -163,9 +217,9 @@ const ApplicationForm = () => {
                 <InputField
                   label="Salary Range"
                   id="salary"
-                  value={application.salary}
+                  value={application.salaryRange}
                   setValue={(value) =>
-                    setApplication((prev) => ({ ...prev, salary: value }))
+                    setApplication((prev) => ({ ...prev, salaryRange: value }))
                   }
                   isEditMode={isEditMode}
                 />
@@ -182,11 +236,11 @@ const ApplicationForm = () => {
                       id="jobPostingLink"
                       type="url"
                       placeholder="https://..."
-                      value={application.jobPostingLink}
+                      value={application.postingUrl}
                       onChange={(e) =>
                         setApplication((prev) => ({
                           ...prev,
-                          jobPostingLink: e.target.value,
+                          postingUrl: e.target.value,
                         }))
                       }
                       disabled={!isEditMode}
@@ -194,7 +248,7 @@ const ApplicationForm = () => {
                     />
                     <button
                       onClick={() =>
-                        window.open(application.jobPostingLink, "_blank")
+                        window.open(application.postingUrl, "_blank")
                       }
                       type="button"
                       className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
@@ -214,9 +268,12 @@ const ApplicationForm = () => {
                 <InputField
                   label="Required Skills"
                   id="skills"
-                  value={application.skills}
+                  value={application.requiredSkills}
                   setValue={(value) =>
-                    setApplication((prev) => ({ ...prev, skills: value }))
+                    setApplication((prev) => ({
+                      ...prev,
+                      requiredSkills: value,
+                    }))
                   }
                   isEditMode={isEditMode}
                 />
@@ -224,9 +281,12 @@ const ApplicationForm = () => {
                 <TextAreaField
                   label="Job Description"
                   id="description"
-                  value={application.description}
+                  value={application.jobDescription}
                   setValue={(value) =>
-                    setApplication((prev) => ({ ...prev, description: value }))
+                    setApplication((prev) => ({
+                      ...prev,
+                      jobDescription: value,
+                    }))
                   }
                   isEditMode={isEditMode}
                 />
@@ -242,21 +302,20 @@ const ApplicationForm = () => {
                 />
               </div>
             </div>
-          </form>
-        </div>
-
-        {/* Footer */}
-        {isEditMode && (
-          <div className="p-4 border-t bg-white">
-            <button
-              type="submit"
-              className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors duration-200"
-              onClick={handleSubmit}
-            >
-              Submit Application
-            </button>
           </div>
-        )}
+
+          {/* Footer */}
+          {isEditMode && (
+            <div className="p-4 border-t bg-white">
+              <button
+                type="submit"
+                className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                Submit Application
+              </button>
+            </div>
+          )}
+        </form>
       </div>
     </div>
   );
@@ -294,12 +353,15 @@ const SelectField = ({
     </label>
     <select
       id={id}
-      value={value}
+      value={value || ""}
       onChange={(e) => setValue(e.target.value)}
       disabled={!isEditMode}
       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
       required={isRequired}
     >
+      <option value="" disabled>
+        -- Select an option --
+      </option>
       {options.map((opt) => (
         <option key={opt} value={opt}>
           {opt.charAt(0).toUpperCase() + opt.slice(1)}
@@ -338,13 +400,13 @@ const defaultFormValues = {
   company: "",
   role: "",
   location: "",
-  status: "bookmarked",
-  salary: "",
-  jobPostingLink: "",
-  skills: "",
+  appliedPlatform: "",
+  status: "",
+  salaryRange: "",
+  postingUrl: "",
+  requiredSkills: "",
+  jobDescription: "",
   notes: "",
-  description: "",
-  applicationSource: "linkedin",
 };
 
 export default ApplicationForm;

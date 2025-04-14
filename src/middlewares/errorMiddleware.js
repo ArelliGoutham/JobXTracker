@@ -1,7 +1,8 @@
 export const AxiosErrorHandler = (error, action, dispatch) => {
+  console.log(error);
   if (error.response) {
     let message = "";
-    let statusCode = error.response.statusCode;
+    let statusCode = error.response.status;
 
     switch (statusCode) {
       case 401:
@@ -11,10 +12,13 @@ export const AxiosErrorHandler = (error, action, dispatch) => {
         message = "The requested resource was not found.";
         break;
       case 500:
-        message = "Server Error. Please try again later.";
+        message =
+          error.response.data?.message ||
+          "Server Error. Please try again later.";
         break;
       case 429:
-        message = error.response.data || "Too many requests. Try again later.";
+        message =
+          error.response.data?.message || "Too many requests. Try again later.";
         break;
       default:
         message =
